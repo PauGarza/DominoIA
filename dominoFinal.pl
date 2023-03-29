@@ -71,13 +71,12 @@ enemyTurn(State):-
 performMyCommand([Layout,Possible,MyHand,OpHand]):-
     %heuristica
     %If Tengo jugada
-    write("Tengo Jugada?"),
-    read(X),
-    X=y,
+    extremos(Layout,Extremos),
+    listaJugable is [],
+    jugable(Extremos,MyHand,listaJugable),
+    write(listaJugable),
     chooseMove([Layout,Possible,MyHand,OpHand],Move),
-    write(Move),
-
-    performMyCommand([Layout,Possible,MyHand,OpHand],Move);
+       performMyCommand([Layout,Possible,MyHand,OpHand],Move);
 
     size(Possible,Count),
     Count>=1,
@@ -160,15 +159,6 @@ insertDomino([Side1, Side2], Layout, NewLayout ):-
 		Side2 == Last2,
 		pushToFront([Side2, Side1], Layout, NewLayout)
 	).
-
-
-pertenece(X,[X|_]).
-pertenece(X,[_|L]):-
-    pertenece(X,L).
-
-
-perteneceAFicha(X,[Y,L]):-
-    perteneceAFicha(X,L).
 
 % Remove elements contained in a List from another List.
 % Special cases
@@ -291,10 +281,6 @@ alphabeta( Depth, Alpha, Beta,[ [StatesH_Piece, StatesH_Hand] | StatesT], Storag
 	% Compute same level branches:
 	alphabeta( Depth, Alpha, MinimizedBeta, StatesT, Storage, BestMove2, 0),
 	min(MinimizedBeta, BestMove2, BestMove).
-
-% Mock method for the heuristic.
-heuristic(Position):-
-Position = 1.
 
 
 % Create possible states per row:
@@ -471,12 +457,17 @@ numRepetidas2(A,B,[X|Cola]):-
 
 %cuenta las repeticiones que hay por cada numero, las mulas cuentan 1 repeticion
 % i,i,o
+% Input Mano es tanto mano como tablero
 cuenta(Mano,Num, Freq):-
     Num=:=7;
     suma(Mano,Num, X),
     Num1 is Num+1,
     cuenta(Mano, Num1, Cola),
     Freq = [ X | Cola ].
+
+
+
+
 
 %cuenta las repeticiones que hay para un numero en específico, las mulas cuentan 1 repeticion
 % i,i,o
@@ -502,14 +493,9 @@ verifica2([X|_],Num):-
 chooseMove([Layout,_,MyHand,_],Move):-
     bestChoice(Layout,MyHand,Move).
 
-numOptions(MyHand,Valores):-
-    numOptions(MyHand,Valores,0).
-numOptions(MyHand,Valores,Cont):-
-
-
 bestChoice(Layout,MyHand,Pieza):-
-    X1 is getFirstElement(Layout,X1),
-    X2 is getLastElement(Layout,X2),
+    X1 is getFirstElement(Layout,[X1|_]),
+    X2 is getLastElement(Layout,[_|X2]),
     agarraDeMano([X1,X2],MyHand,Pieza).
 
 agarraDeMano(_Extremos,[],_Pieza):-
@@ -522,3 +508,26 @@ agarraDeMano(Extremos,[[C1,C2]|Y],Pieza):-
     pertenece(C2,Extremos),
     Pieza is [C1,C2];
     Pieza is [].
+
+
+jugable(_,[],_Jugables):-
+    !.
+jugable([W,Z],[X|Y],Jugables):-
+    Jugables2 is [],
+    pertenece(W,X),
+    append(Jugables,X,Jugables2);
+    pertenece(Z,X),
+    append(Jugables,X,Jugables2),
+    jugable([W,Z],Y,Jugables2).
+
+extremos(Layout,Extremos):-
+    X1 is getFirstElement(Layout,[X1,_]),
+    X2 is getLastElement(Layout,[_,X2]),
+    Extremos is [X1,X2].
+
+
+pertenece(X,[X|_]).
+pertenece(X,[_|L]):-
+    pertenece(X,L).
+
+
