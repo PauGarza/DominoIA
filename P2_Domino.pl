@@ -1,13 +1,16 @@
 /*-------------------- Instructions --------------------*/
 % You can start the game using:
 % startGame.
-
-
-% Still implementing:
-
-% Need to finish! This method returns the possible pieces in the enemy hand
-% This method is suposed to get a list containing the possible domino tiles that can be played by us.
-% write("What is the enemy doing (d: draw| p: playing):"),
+% Input the tiles in [#,#] format
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%           Inteligencia Artificial           %
+%            Proyecto 1:Polinomios            %
+%                                             %
+%  Salvador Alejandro Uribe Calva  -  188311  %
+%  Paulina Garza Allende           -  188456  %
+%  Josué Miguel Méndez Sánchez	   -  182977  %
+%  Pojo Vitte San Juan             -  179524  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 /*-------------------- Board & Game Engine --------------------*/
 
@@ -44,12 +47,10 @@ draw(State, Current, EndCondition, NewState):-
 
 % Determine what player is going to play first
 chooseTurn(State):-
-    %HD is GetHD
-    %write(HD)
     write("Im I Highest Double? (y/n)"),
     read(Y),
     Y=y,
-     write("Insert piece value [X, Y]: "),
+    write("Insert piece value [X, Y]: "),
     read(XD),
     performMyCommand(State,XD );
     enemyTurn(State).
@@ -161,6 +162,38 @@ insertDomino([Side1, Side2], Layout, NewLayout ):-
 		Side2 == Last2,
 		pushToEnd([Side2, Side1], Layout, NewLayout)
 	).
+/*--------------Heuristic------------------*/
+
+
+jugable(_,[],_Jugables):-
+    !.
+jugable([W,Z],[X|Y],Jugables):-
+    Jugables2=[],
+    pertenece(W,X),!,
+    append(Jugables2,X,Jugables);
+    Jugables2=[],!,
+    pertenece(Z,X),!,
+    append(Jugables2,X,Jugables),!;
+    Jugables3 = [],
+    jugable([W,Z],Y,Jugables3).
+
+extremos(Layout,Extremos):-
+    getFirstElement(Layout,[X1, _]),
+    getLastElement(Layout,[_ ,X2]),
+    Extremos = [X1,X2].
+
+pertenece(X,[X|_]):-
+    !.
+pertenece(X,[_|L]):-
+       pertenece(X,L).
+
+/*---------------------------*/
+/*----------FAIL-------------*/
+/*----------ZONE-------------*/
+/*---------------------------*/
+
+%Aquí se encuentra el intento fallido de heurística
+
 
 % Remove elements contained in a List from another List.
 % Special cases
@@ -510,28 +543,3 @@ agarraDeMano(Extremos,[[C1,C2]|Y],Pieza):-
     pertenece(C2,Extremos),
     Pieza = [C1,C2];
     Pieza = [].
-
-
-jugable(_,[],_Jugables):-
-    !.
-jugable([W,Z],[X|Y],Jugables):-
-    Jugables2=[],
-    pertenece(W,X),!,
-    append(Jugables2,X,Jugables);
-    Jugables2=[],!,
-    pertenece(Z,X),!,
-    append(Jugables2,X,Jugables),!;
-    Jugables3 = [],
-    jugable([W,Z],Y,Jugables3).
-
-extremos(Layout,Extremos):-
-    getFirstElement(Layout,[X1, _]),
-    getLastElement(Layout,[_ ,X2]),
-    Extremos = [X1,X2].
-
-pertenece(X,[X|_]):-
-    !.
-pertenece(X,[_|L]):-
-       pertenece(X,L).
-
-
